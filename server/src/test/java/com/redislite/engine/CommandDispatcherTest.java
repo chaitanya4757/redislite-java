@@ -50,4 +50,24 @@ public class CommandDispatcherTest {
         Reply reply = dispatcher.execute(new Command("GET", List.of()));
         assertEquals(Reply.Type.ERROR, reply.type());
     }
+    @Test 
+    void incrOnMissingKeyReturnsOne(){
+        CommandDispatcher dispatcher = new CommandDispatcher(new Store());
+        Reply reply = dispatcher.execute(new Command("INCR", List.of("n")));
+        assertEquals(Reply.integer(1), reply);
+    }
+    @Test 
+    void incrAddsOneToExistingNumber(){
+        CommandDispatcher dispatcher = new CommandDispatcher(new Store());
+        dispatcher.execute(new Command("SET", List.of("n","10")));
+        Reply reply = dispatcher.execute(new Command("INCR", List.of("n")));
+        assertEquals(Reply.integer(11), reply);
+    }
+    @Test 
+    void incrOnTextReturnsError(){
+        CommandDispatcher dispatcher = new CommandDispatcher(new Store());
+        dispatcher.execute(new Command("SET",List.of("n", "Hello")));
+        Reply reply = dispatcher.execute(new Command("INCR", List.of("n")));
+        assertEquals(Reply.Type.ERROR, reply.type());
+    }
 }

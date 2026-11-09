@@ -44,6 +44,51 @@ public class CommandDispatcher implements CommandHandler {
                 else{
                     return Reply.bulk(out);
                 }
+            case "EXISTS":
+                if(command.args().size() != 1){
+                    return Reply.error("ERR wrong number of arguments for 'exists' command");
+                }
+                if(store.exists(command.args().get(0))){
+                    return Reply.integer(1);
+                }
+                else{
+                    return Reply.integer(0);
+                }
+            case "DEL":
+                if (command.args().size() != 1) {
+                return Reply.error("ERR wrong number of arguments for 'del' command");
+                }
+                if(store.exists(command.args().get(0))){
+                String delOut = command.args().get(0);
+                if(store.delete(delOut)){
+                    return Reply.integer(1);
+                }
+                else return Reply.integer(0);
+                }
+                else return Reply.integer(0);
+            case "INCR":
+                if(command.args().size() != 1){
+                    return Reply.error("ERR wrong number of arguments for 'incr' command");
+                }
+                // if(!store.exists(command.args().get(0))){
+                //     return Reply.integer(0);
+                // }
+                String key = command.args().get(0);
+                String value = store.get(key);
+                long number;
+                if(value == null){
+                    number = 0;
+                } 
+                else {
+                    try{
+                        number = Long.parseLong(value);
+                    }catch (NumberFormatException e){
+                        return Reply.error("ERR value is not an integer or out of range");
+                    }
+                }
+                number = number+1;
+                store.set(key, String.valueOf(number) );
+                return Reply.integer(number);
             default :
             return Reply.error("Invalid command");
         }
